@@ -1,1 +1,0 @@
-# To Start Both Front and Backend Run `./start_app.sh`
