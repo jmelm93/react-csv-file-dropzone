@@ -49,19 +49,28 @@ export default function Dropzone({...props}) {
 
     // ** HELPER FUNCTIONS ** //
 
-    const qaDuplicateFile = (fileName) => {
+    const qaDuplicateFile = (inputFile) => {
         const listOfFileNames =  csvFile.length > 0 ? csvFile.map(file => file.name) : null; 
+        console.log('inputfile name: ', inputFile.name);
         if (listOfFileNames) {
-            if (listOfFileNames.includes(fileName)) {
-                const msg = `The file ${fileName} was already uploaded. The file was omitted for this reason.`;
-                setDuplicateFileMessage(msg);
-                // console.log(msg);
+            if (listOfFileNames.includes(inputFile.name)) {
+                setDuplicateFileMessage(`The file ${inputFile.name} was already uploaded. The file was omitted for this reason.`);
                 return true;
             }
         } else {
             return false;
         }
     }
+
+    const qaHeaderListMatch = (dfCols, fileName, qaHeaderList) => {
+        if (qaHeaderList.every(item => dfCols.includes(item))) {
+            return false;
+        } else {
+            setHeaderMismatch(`The file ${fileName} does not have the expected headers. Please upload a file with the headers [ ${qaHeaderList} ].`); // set headerMismatch to msg
+            return true;
+        }
+    } 
+
 
 
     // ** DROPZONE FUNCTIONALITY ** //
@@ -106,22 +115,19 @@ export default function Dropzone({...props}) {
     const handleUpload = (listOfFiles) => {
         for (let i = 0; i < listOfFiles.length; i++) { // start at 0 and increment by 1 until i is no longer less than listOfFiles.length
             const file = listOfFiles[i];
-            const fileName = file.name;
-            console.log('index: ', i, 'csvValues.length: ', csvValues.length, 'current job file: ', fileName); // log index, csvValues.length, and current job file
             dfd.readCSV(file).then(df => { // read csv file
-                if (!qaHeaderList.every(item => df.columns.includes(item))) { // QA csv columns to ensure they match qaHeaderList
-                    setHeaderMismatch(`The file ${fileName} does not have the expected headers. Please upload a file with the headers [ ${qaHeaderList} ].`); // set headerMismatch to msg
-                } else {                        
+                console.log('index: ', i, 'File Length: ', df.values.length, 'Job File Name: ', file.name); // log index, csvValues.length, and current job file
+                if (qaHeaderListMatch(df.columns, file.name, qaHeaderList) || qaDuplicateFile(file)) { // QA csv columns to ensure they match qaHeaderList and that the file has not already been uploaded
+                    return;
+                } else {
+                    setCsvFile(prevState => prevState.concat([file])); // add file to csvFile (populates the list of file names uploaded)                        
                     let sub_df = df.loc({columns: qaHeaderList}); // subset df to only include columns in qaHeaderList - https://danfo.jsdata.org/api-reference/dataframe/danfo.dataframe.loc
                         setCsvValues(prevState => prevState.concat(sub_df.values)); // add values to csvValues
-                        if (!qaDuplicateFile(fileName)) {
-                            setCsvFile(prevState => prevState.concat([file])); // add file to csvFile (populates the list of file names uploaded)
-                        }
-                    }
                 }
-            );
+            });
         }
     }
+
 
     return (
         <Grid container sx={{marginTop: '25px'}}>
@@ -136,7 +142,7 @@ export default function Dropzone({...props}) {
                         <Card sx={parentCardStyles}>
                             
                             {/* CONDITIONAL UPLOAD ICON*/}
-                            {csvFile.length > 0 ? null : 
+                            {csvValues.length > 0 ? null : 
                                 <Box sx={noFilesBoxStyles}>
                                     <CardMedia component="img" sx={{ marginTop: "-15px", width: 30 }} image={UploadIcon} alt="file upload icon" /> 
                                     <CardContent> <Typography component="div" variant="p" sx={{fontSize: '16px', alignItems: 'center'}}>Drag & drop or{" "} <Box component="span" sx={boxSpanStyles}> choose file</Box>.</Typography> </CardContent>
@@ -171,7 +177,6 @@ const parentCardStyles = {
     borderRadius: "2px",
     paddingTop: "35px", 
     paddingBottom: "30px", 
-    // on hover pointer
     '&:hover': {
         cursor: "pointer",
     }
@@ -182,8 +187,6 @@ const parentBoxStyles = {
     alignItems: "center",
     margin: "auto",
     color: "#000639",
-
-    // scroll if too many files
     width: "100%",
 }
 
