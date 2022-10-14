@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as dfd from "danfojs";
 import Tooltips from './tooltips';
 import UploadIcon from '../assets/uploadIcon.svg'
+import cleanNumbers from '../helpers/cleanNumbers';
 import { 
     Box, 
     Card, 
@@ -144,9 +145,11 @@ export default function Dropzone({...props}) {
 
                             {/* CONDITIONAL FILE LIST */}
                             {csvValues.length === 0 ? null :
-                                <Stack sx={parentBoxStyles} direction="column">
-                                    <Typography component="div" variant="p" sx={{fontSize: '16px', alignItems: 'center', marginBottom: '10px'}}>{csvValues.length} Rows & {csvFile.length} {csvFile.length === 1 ? "File" : "Files"} Uploaded</Typography>
-                                    <ol className="file-meta">{csvFile.map(item => <li key={item.name} className="file-meta-item"> <Box component={'span'} sx={cardRow} className={`file-name ${item.invalid ? 'file-error' : ''}`}>{item.name}</Box> </li>)}</ol>
+                                <Stack direction="column" sx={parentBoxStyles}>
+                                    <Typography component="div" variant="p" sx={{fontSize: '16px', alignItems: 'center', marginBottom: '10px'}}>{csvFile.length} {csvFile.length === 1 ? "File" : "Files"} ({cleanNumbers(csvValues.length)} Rows) Processed</Typography>
+                                    <Box sx={listFilesStyles}>
+                                        <ol className="file-meta">{csvFile.map(item => <li key={item.name} className="file-meta-item"> <Box component={'span'} sx={cardRow} className={`file-name ${item.invalid ? 'file-error' : ''}`}>{item.name}</Box> </li>)}</ol>
+                                    </Box>
                                 </Stack>
                             }
                         </Card>
@@ -181,10 +184,19 @@ const parentBoxStyles = {
     color: "#000639",
 
     // scroll if too many files
+    width: "100%",
+}
+
+const listFilesStyles = {
+    display: "flex",
+    // alignItems: "center",
+    margin: "auto",
+    color: "#000639",
+
+    // scroll if too many files
     overflowY: "auto",
     height: "130px",
     maxHeight: "130px",
-    width: "100%",
 }
 
 const noFilesBoxStyles = {
