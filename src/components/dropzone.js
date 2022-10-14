@@ -51,7 +51,6 @@ export default function Dropzone({...props}) {
 
     const qaDuplicateFile = (inputFile) => {
         const listOfFileNames =  csvFile.length > 0 ? csvFile.map(file => file.name) : null; 
-        console.log('inputfile name: ', inputFile.name);
         if (listOfFileNames) {
             if (listOfFileNames.includes(inputFile.name)) {
                 setDuplicateFileMessage(`The file ${inputFile.name} was already uploaded. The file was omitted for this reason.`);
