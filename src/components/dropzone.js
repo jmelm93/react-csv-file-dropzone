@@ -72,7 +72,6 @@ export default function Dropzone({...props}) {
     } 
 
 
-
     // ** DROPZONE FUNCTIONALITY ** //
 
     const preventDefault = (e) => {  // preventDefault obj
