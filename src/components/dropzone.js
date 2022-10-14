@@ -107,10 +107,6 @@ export default function Dropzone({...props}) {
             const file = listOfFiles[i];
             const fileName = file.name;
             console.log('index: ', i, 'csvValues.length: ', csvValues.length, 'current job file: ', fileName); // log index, csvValues.length, and current job file
-            // pause for 10 seconds
-            setTimeout(() => {
-                console.log('index: ', i, 'csvValues.length: ', csvValues.length, 'current job file: ', fileName); // log index, csvValues.length, and current job file
-            }, 10000);
             dfd.readCSV(file).then(df => { // read csv file
                 if (!qaHeaderList.every(item => df.columns.includes(item))) { // QA csv columns to ensure they match qaHeaderList
                     setHeaderMismatch(`The file ${fileName} does not have the expected headers. Please upload a file with the headers [ ${qaHeaderList} ].`); // set headerMismatch to msg
